@@ -1,7 +1,11 @@
-# jp-engine_render
+# hajimu_engine_render
 
-**はじむ言語**用 2D レンダリングエンジンプラグイン。
-SDL2 ウィンドウ + OpenGL 3.3 Core Profile による高速スプライトバッチ描画。
+> **はじむ言語**向け SDL2 + OpenGL 3.3 Core Profile 2D レンダリングエンジン
+
+スプライト・図形・テキスト描画、カメラ制御、キーボード/マウス入力を統合した  
+オールインワン描画プラグインです。他の `hajimu_engine_*` シリーズのベースとなります。
+
+---
 
 ## 機能
 
@@ -28,14 +32,12 @@ SDL2 ウィンドウ + OpenGL 3.3 Core Profile による高速スプライトバ
 ## ビルド
 
 ```bash
-# 依存ヘッダーをダウンロード
-make vendor
+git clone https://github.com/ReoShiozawa/hajimu_engine_render.git
+cd hajimu_engine_render
 
-# ビルド (build/engine_render.hjp が生成される)
-make
-
-# インストール (~/.hajimu/plugins/engine_render/)
-make install
+make vendor   # stb_image / stb_truetype をダウンロード
+make          # → build/engine_render.hjp
+make install  # → ~/.hajimu/plugins/engine_render/
 ```
 
 ## クイックスタート
@@ -146,6 +148,13 @@ make install
 | `乱数()` | float | 0.0〜1.0 |
 | `乱数整数(最小, 最大)` | int | 範囲内の整数 |
 
+## サンプル
+
+- [examples/](examples/) — スプライト、タイル、カメラデモ
+
+---
+
 ## ライセンス
 
-MIT License — Copyright (c) 2026 Reo Shiozawa
+MIT License — Copyright (c) 2026 Reo Shiozawa  
+stb_image / stb_truetype: Public Domain — Copyright (c) Sean Barrett
