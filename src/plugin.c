@@ -19,6 +19,7 @@ static ENG_Renderer* g_r = NULL;
 #define NUM(v)     hajimu_number((double)(v))
 #define BVAL(v)    hajimu_bool((bool)(v))
 #define NUL        hajimu_null()
+#define STR(s)     hajimu_string(s)
 
 /* ================================================================
  * ライフサイクル
@@ -251,6 +252,31 @@ static Value fn_カメラズーム取得(int argc, Value* args) { (void)argc; (v
  * ================================================================ */
 static Value fn_乱数(int argc, Value* args)     { (void)argc; (void)args; return NUM(eng_randf()); }
 static Value fn_乱数整数(int argc, Value* args) { return NUM(eng_randi(ARG_INT(0), ARG_INT(1))); }
+static Value fn_マウスDX(int argc, Value* args)             { (void)argc; (void)args; return NUM(eng_mouse_dx(g_r)); }
+static Value fn_マウスDY(int argc, Value* args)             { (void)argc; (void)args; return NUM(eng_mouse_dy(g_r)); }
+static Value fn_ウィンドウタイトル設定(int argc, Value* args) { eng_set_window_title(g_r, ARG_STR(0)); return NUL; }
+static Value fn_スクリーン変換ワールド(int argc, Value* args) {
+    float wx, wy;
+    eng_cam_screen_to_world(g_r, ARG_F(0), ARG_F(1), &wx, &wy);
+    static char buf[64];
+    snprintf(buf, sizeof(buf), "%g,%g", (double)wx, (double)wy);
+    return STR(buf);
+}
+static Value fn_ワールド変換スクリーン(int argc, Value* args) {
+    float sx, sy;
+    eng_cam_world_to_screen(g_r, ARG_F(0), ARG_F(1), &sx, &sy);
+    static char buf[64];
+    snprintf(buf, sizeof(buf), "%g,%g", (double)sx, (double)sy);
+    return STR(buf);
+}
+static Value fn_テキスト折返し描画(int argc, Value* args) {
+    float cr = argc>5?ARG_F(5):1, cg = argc>6?ARG_F(6):1,
+          cb = argc>7?ARG_F(7):1, ca_v = argc>8?ARG_F(8):1;
+    eng_draw_text_wrap(g_r, (ENG_FontID)ARG_INT(0), ARG_STR(1),
+                       ARG_F(2), ARG_F(3), ARG_F(4),
+                       cr, cg, cb, ca_v);
+    return NUL;
+}
 
 /* ================================================================
  * プラグイン登録
@@ -323,12 +349,18 @@ static HajimuPluginFunc funcs[] = {
     /* ユーティリティ */
     FN(乱数,     0, 0),
     FN(乱数整数, 2, 2),
+    FN(マウスDX,             0, 0),
+    FN(マウスDY,             0, 0),
+    FN(ウィンドウタイトル設定,    1, 1),
+    FN(スクリーン変換ワールド,    2, 2),
+    FN(ワールド変換スクリーン,    2, 2),
+    FN(テキスト折返し描画,        5, 9),
 };
 
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_render",
-        .version        = "1.2.0",
+        .version        = "1.3.0",
         .author         = "Reo Shiozawa",
         .description    = "はじむ用 2D レンダリングエンジン (SDL2 + OpenGL 3.3)",
         .functions      = funcs,

@@ -182,3 +182,45 @@ float eng_text_height(ENG_Renderer* r, ENG_FontID fid) {
     if (slot < 0 || slot >= ENG_MAX_FONTS || !r->fonts[slot].used) return 0.0f;
     return r->fonts[slot].size;
 }
+
+/* ── テキスト折り返し描画 ───────────────────────────────*/
+void eng_draw_text_wrap(ENG_Renderer* r, ENG_FontID fid,
+                         const char* text,
+                         float x, float y, float max_w,
+                         float cr, float cg, float cb, float ca) {
+    if (!r || !text || fid == 0 || max_w <= 0.0f) return;
+    int slot = (int)fid - 1;
+    if (slot < 0 || slot >= ENG_MAX_FONTS || !r->fonts[slot].used) return;
+    float line_h = r->fonts[slot].size * 1.2f;  /* 行間 = フォントサイズ * 1.2 */
+    /* 単語ごとに折り返す (スペースで分割; 日本語は文字ごと) */
+    static char line_buf[1024];
+    float cx2  = x;
+    float cy2  = y;
+    const char* p = text;
+    while (*p) {
+        /* 1文字分の幅を計算 */
+        unsigned char c = (unsigned char)*p;
+        float advance = 0.0f;
+        if (c == '\n') {
+            /* 改行 */
+            cx2 = x; cy2 += line_h; p++; continue;
+        }
+        if (c < 32 || c >= 128) {
+            /* 非ASCII: フォントサイズを近似幅として使用 */
+            advance = r->fonts[slot].size;
+        } else {
+            stbtt_bakedchar* baked = (stbtt_bakedchar*)r->fonts[slot].baked;
+            advance = baked[c - 32].xadvance;
+        }
+        if (cx2 + advance > x + max_w && cx2 > x) {
+            /* 折り返し */
+            cx2 = x; cy2 += line_h;
+        }
+        /* 1文字を描画 (eng_draw_text を文字ごと呼ぶのはコスト大なので
+         * 直接バッチに1文字送る) */
+        line_buf[0] = (char)c; line_buf[1] = '\0';
+        eng_draw_text(r, fid, line_buf, cx2, cy2, cr, cg, cb, ca);
+        cx2 += advance;
+        p++;
+    }
+}

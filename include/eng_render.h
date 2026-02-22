@@ -277,6 +277,11 @@ float eng_text_width(ENG_Renderer* r, ENG_FontID fid, const char* text);
 /** フォントの行高さ (px) を返す (ascent+descent+linegap 相当) */
 float eng_text_height(ENG_Renderer* r, ENG_FontID fid);
 
+/** テキストを最大幅 max_w に収まるよう自動折り返して描画する */
+void eng_draw_text_wrap(ENG_Renderer* r, ENG_FontID fid, const char* text,
+                        float x, float y, float max_w,
+                        float cr, float cg, float cb, float ca);
+
 /* ── カメラ ─────────────────────────────────────────────*/
 
 /** カメラ位置を設定 */
@@ -300,6 +305,12 @@ float eng_cam_get_y(ENG_Renderer* r);
 /** カメラのズームを取得 */
 float eng_cam_get_zoom(ENG_Renderer* r);
 
+/** スクリーン座標 → ワールド座標に変換 (カメラ変換の逆) */
+void eng_cam_screen_to_world(ENG_Renderer* r, float sx, float sy, float* wx, float* wy);
+
+/** ワールド座標 → スクリーン座標に変換 */
+void eng_cam_world_to_screen(ENG_Renderer* r, float wx, float wy, float* sx, float* sy);
+
 /* ── ユーティリティ ─────────────────────────────────────*/
 
 /** フルスクリーン切替。fullscreen=true でボーダレスフルスクリーン。 */
@@ -307,6 +318,15 @@ void eng_set_fullscreen(ENG_Renderer* r, bool fullscreen);
 
 /** マウスカーソルの表示/非表示。 */
 void eng_set_cursor_visible(ENG_Renderer* r, bool visible);
+
+/** ウィンドウタイトルを設定する */
+void eng_set_window_title(ENG_Renderer* r, const char* title);
+
+/** 前フレームからのマウスの水平移動量 (px) */
+float eng_mouse_dx(ENG_Renderer* r);
+
+/** 前フレームからのマウスの垂直移動量 (px) */
+float eng_mouse_dy(ENG_Renderer* r);
 
 /* ── 図形 (追加) ────────────────────────────────────────*/
 

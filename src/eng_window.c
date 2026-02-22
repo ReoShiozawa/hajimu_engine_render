@@ -178,6 +178,8 @@ bool eng_update(ENG_Renderer* r) {
     }
 
     /* マウス状態更新 */
+    r->mouse_px = r->mouse_x;   /* 前フレーム位置を保存 */
+    r->mouse_py = r->mouse_y;
     int mx, my;
     r->mouse_state = SDL_GetMouseState(&mx, &my);
     r->mouse_x = (float)mx;
@@ -289,3 +291,10 @@ void eng_set_cursor_visible(ENG_Renderer* r, bool visible) {
     (void)r;
     SDL_ShowCursor(visible ? SDL_ENABLE : SDL_DISABLE);
 }
+
+void eng_set_window_title(ENG_Renderer* r, const char* title) {
+    if (r && r->window && title) SDL_SetWindowTitle(r->window, title);
+}
+
+float eng_mouse_dx(ENG_Renderer* r) { return r ? r->mouse_x - r->mouse_px : 0.0f; }
+float eng_mouse_dy(ENG_Renderer* r) { return r ? r->mouse_y - r->mouse_py : 0.0f; }

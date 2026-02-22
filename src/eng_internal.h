@@ -79,6 +79,7 @@ struct ENG_Renderer {
     const uint8_t* key_state;     /* SDL_GetKeyboardState */
     uint8_t  key_prev[512];
     float    mouse_x, mouse_y;
+    float    mouse_px, mouse_py;  /* 前フレームのマウス座標 (dx/dy 計算用) */
     uint32_t mouse_state;         /* SDL_GetMouseState */
     uint32_t mouse_prev;
     float    mouse_wheel;         /* このフレームのホイール量 */
