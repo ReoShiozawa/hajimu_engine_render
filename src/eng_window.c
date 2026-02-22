@@ -157,6 +157,7 @@ bool eng_update(ENG_Renderer* r) {
     /* キー状態を前フレームに保存 */
     memcpy(r->key_prev, r->key_state, 512);
     r->mouse_prev  = r->mouse_state;
+    r->mouse_wheel = 0.0f;  /* ホイールはイベントベースでリセット */
 
     /* イベント処理 */
     SDL_Event ev;
@@ -171,6 +172,9 @@ bool eng_update(ENG_Renderer* r) {
             glViewport(0, 0, r->win_w, r->win_h);
             eng_update_proj(r);
         }
+        if (ev.type == SDL_MOUSEWHEEL) {
+            r->mouse_wheel += (float)ev.wheel.y;
+        }
     }
 
     /* マウス状態更新 */
@@ -178,6 +182,18 @@ bool eng_update(ENG_Renderer* r) {
     r->mouse_state = SDL_GetMouseState(&mx, &my);
     r->mouse_x = (float)mx;
     r->mouse_y = (float)my;
+
+    /* FPS キャップ */
+    if (r->fps_cap > 0) {
+        uint64_t freq     = SDL_GetPerformanceFrequency();
+        uint64_t target   = freq / (uint64_t)r->fps_cap;
+        uint64_t elapsed  = SDL_GetPerformanceCounter() - r->frame_end_tick;
+        if (elapsed < target) {
+            uint32_t wait_ms = (uint32_t)(((target - elapsed) * 1000) / freq);
+            if (wait_ms > 0) SDL_Delay(wait_ms);
+        }
+    }
+    r->frame_end_tick = SDL_GetPerformanceCounter();
 
     return true;
 }
@@ -239,6 +255,18 @@ float eng_mouse_y(ENG_Renderer* r)            { return r ? r->mouse_y : 0.0f; }
 bool  eng_mouse_down(ENG_Renderer* r, int b)  { return r && (r->mouse_state & SDL_BUTTON(b)); }
 bool  eng_mouse_pressed(ENG_Renderer* r, int b) {
     return r && (r->mouse_state & SDL_BUTTON(b)) && !(r->mouse_prev & SDL_BUTTON(b));
+}
+bool  eng_mouse_released(ENG_Renderer* r, int b) {
+    return r && !(r->mouse_state & SDL_BUTTON(b)) && (r->mouse_prev & SDL_BUTTON(b));
+}
+float eng_mouse_wheel(ENG_Renderer* r) { return r ? r->mouse_wheel : 0.0f; }
+
+/* ── FPS キャップ ───────────────────────────────────────*/
+void eng_set_fps_cap(ENG_Renderer* r, int fps) {
+    if (r) {
+        r->fps_cap = fps;
+        r->frame_end_tick = SDL_GetPerformanceCounter();
+    }
 }
 
 /* ── ユーティリティ ─────────────────────────────────────*/

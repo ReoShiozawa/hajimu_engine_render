@@ -143,6 +143,25 @@ bool eng_mouse_down(ENG_Renderer* r, int button);
 /** マウスボタンがこのフレームで押されたか */
 bool eng_mouse_pressed(ENG_Renderer* r, int button);
 
+/** マウスボタンがこのフレームで離されたか */
+bool eng_mouse_released(ENG_Renderer* r, int button);
+
+/** このフレームのマウスホイール量 (上=正, 下=負) */
+float eng_mouse_wheel(ENG_Renderer* r);
+
+/* ── FPS キャップ ───────────────────────────────────────*/
+
+/** FPS 上限を設定 (0=無制限, デフォルト=0) */
+void eng_set_fps_cap(ENG_Renderer* r, int fps);
+
+/* ── クリッピング ───────────────────────────────────────*/
+
+/** この矩形外への描画をカット (UI ウィンドウなどに使用) */
+void eng_clip_begin(ENG_Renderer* r, float x, float y, float w, float h);
+
+/** クリッピング解除 */
+void eng_clip_end(ENG_Renderer* r);
+
 /* ── 描画 (基本) ────────────────────────────────────────*/
 
 /** 画面をクリア (RGBA 各 0.0〜1.0) */
@@ -197,6 +216,16 @@ void eng_draw_sprite_uv_ex(ENG_Renderer* r, ENG_TexID id,
                            float u0, float v0, float u1, float v1,
                            float rot, float ox, float oy,
                            float cr, float cg, float cb, float ca);
+
+/**
+ * フリップ描画 (flip_x=true で水平反転, flip_y=true で垂直反転)
+ * rot=回転角(度), cr/cg/cb/ca=乗算カラー
+ */
+void eng_draw_sprite_flip(ENG_Renderer* r, ENG_TexID id,
+                          float x, float y, float w, float h,
+                          bool flip_x, bool flip_y,
+                          float rot,
+                          float cr, float cg, float cb, float ca);
 
 /* ── 図形描画 ───────────────────────────────────────────*/
 

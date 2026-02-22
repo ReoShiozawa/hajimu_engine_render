@@ -52,6 +52,15 @@ static Value fn_マウスX(int argc, Value* args)          { (void)argc; (void)a
 static Value fn_マウスY(int argc, Value* args)          { (void)argc; (void)args; return NUM(eng_mouse_y(g_r)); }
 static Value fn_マウスボタン押下中(int argc, Value* args) { return BVAL(eng_mouse_down(g_r, ARG_INT(0))); }
 static Value fn_マウスボタン押下(int argc, Value* args)  { return BVAL(eng_mouse_pressed(g_r, ARG_INT(0))); }
+static Value fn_マウスボタン離した(int argc, Value* args) { return BVAL(eng_mouse_released(g_r, ARG_INT(0))); }
+static Value fn_マウスホイール(int argc, Value* args)    { (void)argc; (void)args; return NUM(eng_mouse_wheel(g_r)); }
+
+/* FPS キャップ */
+static Value fn_FPS上限設定(int argc, Value* args) { eng_set_fps_cap(g_r, ARG_INT(0)); return hajimu_null(); }
+
+/* クリッピング */
+static Value fn_クリップ開始(int argc, Value* args) { eng_clip_begin(g_r, ARG_F(0), ARG_F(1), ARG_F(2), ARG_F(3)); return hajimu_null(); }
+static Value fn_クリップ終了(int argc, Value* args) { (void)argc; (void)args; eng_clip_end(g_r); return hajimu_null(); }
 
 static Value fn_キーコード(int argc, Value* args) {
     const char* name = ARG_STR(0);
@@ -118,6 +127,19 @@ static Value fn_スプライト描画UV(int argc, Value* args) {
     eng_draw_sprite_uv(g_r, (ENG_TexID)ARG_INT(0),
                        ARG_F(1), ARG_F(2), ARG_F(3), ARG_F(4),
                        ARG_F(5), ARG_F(6), ARG_F(7), ARG_F(8));
+    return NUL;
+}
+static Value fn_スプライト描画フリップ(int argc, Value* args) {
+    bool fx = argc > 5 ? (bool)args[5].boolean : false;
+    bool fy = argc > 6 ? (bool)args[6].boolean : false;
+    float rot = argc > 7 ? ARG_F(7) : 0.0f;
+    float cr = argc > 8  ? ARG_F(8)  : 1.0f;
+    float cg = argc > 9  ? ARG_F(9)  : 1.0f;
+    float cb = argc > 10 ? ARG_F(10) : 1.0f;
+    float ca = argc > 11 ? ARG_F(11) : 1.0f;
+    eng_draw_sprite_flip(g_r, (ENG_TexID)ARG_INT(0),
+        ARG_F(1), ARG_F(2), ARG_F(3), ARG_F(4),
+        fx, fy, rot, cr, cg, cb, ca);
     return NUL;
 }
 
@@ -231,7 +253,10 @@ static HajimuPluginFunc funcs[] = {
     FN(マウスY,           0, 0),
     FN(マウスボタン押下中, 1, 1),
     FN(マウスボタン押下,   1, 1),
+    FN(マウスボタン離した, 1, 1),
+    FN(マウスホイール,   0, 0),
     FN(キーコード,         1, 1),
+    FN(FPS上限設定,     1, 1),
     /* 描画基本 */
     FN(描画クリア,   0, 4),
     FN(描画フラッシュ, 0, 0),
@@ -244,6 +269,10 @@ static HajimuPluginFunc funcs[] = {
     FN(スプライト描画,     5, 5),
     FN(スプライト描画拡張, 5, 12),
     FN(スプライト描画UV,   9, 9),
+    FN(スプライト描画フリップ, 5, 12),
+    /* クリッピング */
+    FN(クリップ開始, 4, 4),
+    FN(クリップ終了, 0, 0),
     /* 図形 */
     FN(矩形描画, 4, 8),
     FN(矩形塗潰, 4, 8),
@@ -272,7 +301,7 @@ static HajimuPluginFunc funcs[] = {
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_render",
-        .version        = "1.0.0",
+        .version        = "1.1.0",
         .author         = "Reo Shiozawa",
         .description    = "はじむ用 2D レンダリングエンジン (SDL2 + OpenGL 3.3)",
         .functions      = funcs,

@@ -181,3 +181,45 @@ void eng_draw_line(ENG_Renderer* r,
     b->verts[base+3] = (ENG_Vertex){x1-hx, y1-hy, 0,0, cr,cg,cb,ca};
     b->quad_count++;
 }
+
+/* ── フリップ描画 ───────────────────────────────────────*/
+void eng_draw_sprite_flip(ENG_Renderer* r, ENG_TexID id,
+                          float x, float y, float w, float h,
+                          bool flip_x, bool flip_y,
+                          float rot,
+                          float cr, float cg, float cb, float ca) {
+    if (!r || !id) return;
+    GLuint gl_id = eng_tex_gl_id(r, id);
+    if (!gl_id) return;
+    float u0 = flip_x ? 1.0f : 0.0f;
+    float u1 = flip_x ? 0.0f : 1.0f;
+    float v0 = flip_y ? 1.0f : 0.0f;
+    float v1 = flip_y ? 0.0f : 1.0f;
+    eng_batch_push_quad(r,
+        x, y, w, h,
+        u0, v0, u1, v1,
+        rot, 0.5f, 0.5f,
+        cr, cg, cb, ca,
+        gl_id, true
+    );
+}
+
+/* ── クリッピング ───────────────────────────────────────*/
+void eng_clip_begin(ENG_Renderer* r, float x, float y, float w, float h) {
+    if (!r) return;
+    eng_batch_flush(r);  /* 既存描画を先にフラッシュ */
+    r->clip_active = true;
+    r->clip_x = (int)x;
+    r->clip_y = r->win_h - (int)(y + h);  /* OpenGL は下基準 */
+    r->clip_w = (int)w;
+    r->clip_h = (int)h;
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(r->clip_x, r->clip_y, r->clip_w, r->clip_h);
+}
+
+void eng_clip_end(ENG_Renderer* r) {
+    if (!r) return;
+    eng_batch_flush(r);
+    r->clip_active = false;
+    glDisable(GL_SCISSOR_TEST);
+}

@@ -81,7 +81,16 @@ struct ENG_Renderer {
     float    mouse_x, mouse_y;
     uint32_t mouse_state;         /* SDL_GetMouseState */
     uint32_t mouse_prev;
+    float    mouse_wheel;         /* このフレームのホイール量 */
     bool     quit_requested;
+
+    /* FPS キャップ */
+    int      fps_cap;             /* 0=無制限 */
+    uint64_t frame_end_tick;      /* 前フレーム終了時刻 */
+
+    /* クリッピング矩形 */
+    bool     clip_active;
+    int      clip_x, clip_y, clip_w, clip_h;
 
     /* カメラ */
     float cam_x, cam_y, cam_zoom, cam_rot_deg;
