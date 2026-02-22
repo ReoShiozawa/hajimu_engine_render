@@ -29,7 +29,15 @@
 | stb_image | テクスチャ読込 | `make vendor` |
 | stb_truetype | フォントレンダリング | `make vendor` |
 
-## ビルド
+## インストール
+
+### 推奨: はじむパッケージマネージャー
+
+```bash
+hajimu パッケージ 追加 ReoShiozawa/hajimu_engine_render
+```
+
+### ソースからビルド
 
 ```bash
 git clone https://github.com/ReoShiozawa/hajimu_engine_render.git
