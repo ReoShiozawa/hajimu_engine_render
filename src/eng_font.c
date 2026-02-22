@@ -174,3 +174,11 @@ float eng_text_width(ENG_Renderer* r, ENG_FontID fid, const char* text) {
     }
     return w;
 }
+
+/* ── テキスト行高さ ─────────────────────────────────────*/
+float eng_text_height(ENG_Renderer* r, ENG_FontID fid) {
+    if (!r || fid == 0) return 0.0f;
+    int slot = (int)fid - 1;
+    if (slot < 0 || slot >= ENG_MAX_FONTS || !r->fonts[slot].used) return 0.0f;
+    return r->fonts[slot].size;
+}

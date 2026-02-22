@@ -275,3 +275,17 @@ int   eng_randi(int mn, int mx) {
     if (mn >= mx) return mn;
     return mn + rand() % (mx - mn + 1);
 }
+/* ── フルスクリーン / カーソル ──────────────────────────────────────*/
+void eng_set_fullscreen(ENG_Renderer* r, bool fullscreen) {
+    if (!r) return;
+    Uint32 flags = fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
+    SDL_SetWindowFullscreen(r->window, flags);
+    SDL_GetWindowSize(r->window, &r->win_w, &r->win_h);
+    glViewport(0, 0, r->win_w, r->win_h);
+    eng_update_proj(r);
+}
+
+void eng_set_cursor_visible(ENG_Renderer* r, bool visible) {
+    (void)r;
+    SDL_ShowCursor(visible ? SDL_ENABLE : SDL_DISABLE);
+}

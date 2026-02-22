@@ -274,6 +274,9 @@ void eng_draw_text(ENG_Renderer* r, ENG_FontID fid,
 /** テキストの描画幅 (px) を計算 */
 float eng_text_width(ENG_Renderer* r, ENG_FontID fid, const char* text);
 
+/** フォントの行高さ (px) を返す (ascent+descent+linegap 相当) */
+float eng_text_height(ENG_Renderer* r, ENG_FontID fid);
+
 /* ── カメラ ─────────────────────────────────────────────*/
 
 /** カメラ位置を設定 */
@@ -296,6 +299,26 @@ float eng_cam_get_y(ENG_Renderer* r);
 
 /** カメラのズームを取得 */
 float eng_cam_get_zoom(ENG_Renderer* r);
+
+/* ── ユーティリティ ─────────────────────────────────────*/
+
+/** フルスクリーン切替。fullscreen=true でボーダレスフルスクリーン。 */
+void eng_set_fullscreen(ENG_Renderer* r, bool fullscreen);
+
+/** マウスカーソルの表示/非表示。 */
+void eng_set_cursor_visible(ENG_Renderer* r, bool visible);
+
+/* ── 図形 (追加) ────────────────────────────────────────*/
+
+/** 塗りつぶし三角形 */
+void eng_fill_tri(ENG_Renderer* r,
+                  float x0, float y0, float x1, float y1, float x2, float y2,
+                  float cr, float cg, float cb, float ca);
+
+/** 三角形の輪郭 */
+void eng_draw_tri(ENG_Renderer* r,
+                  float x0, float y0, float x1, float y1, float x2, float y2,
+                  float cr, float cg, float cb, float ca);
 
 /* ── ユーティリティ ─────────────────────────────────────*/
 

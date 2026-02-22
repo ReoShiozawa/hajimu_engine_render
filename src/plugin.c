@@ -15,6 +15,7 @@ static ENG_Renderer* g_r = NULL;
 #define ARG_STR(i) ((i) < argc && args[(i)].type == VALUE_STRING  ? args[(i)].string.data : "")
 #define ARG_INT(i) ((int)ARG_NUM(i))
 #define ARG_F(i)   ((float)ARG_NUM(i))
+#define ARG_B(i)   ((i) < argc && args[(i)].type == VALUE_BOOL ? args[(i)].boolean : false)
 #define NUM(v)     hajimu_number((double)(v))
 #define BVAL(v)    hajimu_bool((bool)(v))
 #define NUL        hajimu_null()
@@ -212,10 +213,31 @@ static Value fn_テキスト描画(int argc, Value* args) {
 static Value fn_テキスト幅(int argc, Value* args) {
     return NUM(eng_text_width(g_r, (ENG_FontID)ARG_INT(0), ARG_STR(1)));
 }
+static Value fn_テキスト高さ(int argc, Value* args) {
+    return NUM(eng_text_height(g_r, (ENG_FontID)ARG_INT(0)));
+}
 
 /* ================================================================
- * カメラ
+ * ウィンドウ設定 (v1.2.0)
  * ================================================================ */
+static Value fn_フルスクリーン設定(int argc, Value* args) { eng_set_fullscreen(g_r, ARG_B(0)); return NUL; }
+static Value fn_カーソル表示設定(int argc, Value* args)   { eng_set_cursor_visible(g_r, ARG_B(0)); return NUL; }
+
+/* ================================================================
+ * 図形描画 (v1.2.0 追加)
+ * ================================================================ */
+static Value fn_三角形塗潰(int argc, Value* args) {
+    float cr = argc>6?ARG_F(6):1, cg = argc>7?ARG_F(7):1,
+          cb = argc>8?ARG_F(8):1, ca = argc>9?ARG_F(9):1;
+    eng_fill_tri(g_r, ARG_F(0),ARG_F(1),ARG_F(2),ARG_F(3),ARG_F(4),ARG_F(5), cr,cg,cb,ca);
+    return NUL;
+}
+static Value fn_三角形描画(int argc, Value* args) {
+    float cr = argc>6?ARG_F(6):1, cg = argc>7?ARG_F(7):1,
+          cb = argc>8?ARG_F(8):1, ca = argc>9?ARG_F(9):1;
+    eng_draw_tri(g_r, ARG_F(0),ARG_F(1),ARG_F(2),ARG_F(3),ARG_F(4),ARG_F(5), cr,cg,cb,ca);
+    return NUL;
+}
 static Value fn_カメラ位置設定(int argc, Value* args)  { eng_cam_pos(g_r, ARG_F(0), ARG_F(1)); return NUL; }
 static Value fn_カメラズーム設定(int argc, Value* args) { eng_cam_zoom(g_r, ARG_F(0)); return NUL; }
 static Value fn_カメラ回転設定(int argc, Value* args)  { eng_cam_rot(g_r, ARG_F(0)); return NUL; }
@@ -245,6 +267,8 @@ static HajimuPluginFunc funcs[] = {
     FN(経過時間,       0, 0),
     FN(デルタ時間,     0, 0),
     FN(FPS,            0, 0),
+    FN(フルスクリーン設定, 1, 1),
+    FN(カーソル表示設定,   1, 1),
     /* 入力 */
     FN(キー押下中,        1, 1),
     FN(キー押下,          1, 1),
@@ -279,12 +303,15 @@ static HajimuPluginFunc funcs[] = {
     FN(円描画,   3, 7),
     FN(円塗潰,   3, 7),
     FN(直線描画, 4, 8),
+    FN(三角形描画, 6, 10),
+    FN(三角形塗潰, 6, 10),
     /* フォント */
     FN(フォント読込,         2, 2),
     FN(フォント読込デフォルト, 0, 1),
     FN(フォント削除,         1, 1),
     FN(テキスト描画,         4, 8),
     FN(テキスト幅,           2, 2),
+    FN(テキスト高さ,         1, 1),
     /* カメラ */
     FN(カメラ位置設定,   2, 2),
     FN(カメラズーム設定, 1, 1),
@@ -301,7 +328,7 @@ static HajimuPluginFunc funcs[] = {
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_render",
-        .version        = "1.1.0",
+        .version        = "1.2.0",
         .author         = "Reo Shiozawa",
         .description    = "はじむ用 2D レンダリングエンジン (SDL2 + OpenGL 3.3)",
         .functions      = funcs,

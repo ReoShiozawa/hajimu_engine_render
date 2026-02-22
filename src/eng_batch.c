@@ -223,3 +223,29 @@ void eng_clip_end(ENG_Renderer* r) {
     r->clip_active = false;
     glDisable(GL_SCISSOR_TEST);
 }
+
+/* ── 三角形 ─────────────────────────────────────────────*/
+void eng_fill_tri(ENG_Renderer* r,
+                  float x0, float y0, float x1, float y1, float x2, float y2,
+                  float cr, float cg, float cb, float ca) {
+    if (!r) return;
+    ENG_Batch* b = &r->batch;
+    if (b->quad_count > 0 && b->use_tex) eng_batch_flush(r);
+    if (b->quad_count >= ENG_MAX_BATCH)  eng_batch_flush(r);
+    b->use_tex = false; b->current_tex = 0;
+    /* 三角形を縮退四辺形として送る (v2=v3 で最後の三角形が縮退) */
+    int base = b->quad_count * 4;
+    b->verts[base+0] = (ENG_Vertex){x0, y0, 0,0, cr,cg,cb,ca};
+    b->verts[base+1] = (ENG_Vertex){x1, y1, 0,0, cr,cg,cb,ca};
+    b->verts[base+2] = (ENG_Vertex){x2, y2, 0,0, cr,cg,cb,ca};
+    b->verts[base+3] = (ENG_Vertex){x2, y2, 0,0, cr,cg,cb,ca};
+    b->quad_count++;
+}
+
+void eng_draw_tri(ENG_Renderer* r,
+                  float x0, float y0, float x1, float y1, float x2, float y2,
+                  float cr, float cg, float cb, float ca) {
+    eng_draw_line(r, x0, y0, x1, y1, cr, cg, cb, ca);
+    eng_draw_line(r, x1, y1, x2, y2, cr, cg, cb, ca);
+    eng_draw_line(r, x2, y2, x0, y0, cr, cg, cb, ca);
+}
