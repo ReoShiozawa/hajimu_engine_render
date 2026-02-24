@@ -1,80 +1,70 @@
-# ==============================================================================
-# jp-engine_render — はじむ用 2D レンダリングエンジン
-#
-# 技術スタック: SDL2 + OpenGL 3.3 + stb_image + stb_truetype
-#
-# 使い方:
-#   make vendor        stb ヘッダーをダウンロード（初回のみ）
-#   make               ビルド
-#   make install       ~/.hajimu/plugins/ にインストール
-#   make clean         ビルド成果物を削除
-#   make example       サンプルを実行
-# ==============================================================================
+# =============================================================================
+# engine_render — はじむ言語用プラグイン
+# クロスプラットフォーム Makefile (macOS / Linux / Windows MinGW)
+# =============================================================================
 
-PLUGIN_NAME  = engine_render
-BUILD_DIR    = build
-INSTALL_DIR  = $(HOME)/.hajimu/plugins/$(PLUGIN_NAME)
-OUTPUT       = $(BUILD_DIR)/$(PLUGIN_NAME).hjp
+PLUGIN_NAME = engine_render
+BUILD_DIR   = build
+OUTPUT      = $(BUILD_DIR)/$(PLUGIN_NAME).hjp
 
+# OS 判定 ($(OS) は Windows CMD/PowerShell で "Windows_NT" になる)
+ifeq ($(OS),Windows_NT)
+    DETECTED_OS := Windows
+    INSTALL_DIR := $(USERPROFILE)/.hajimu/plugins
+    NCPU        := $(NUMBER_OF_PROCESSORS)
+else
+    DETECTED_OS := $(shell uname -s 2>/dev/null || echo Unknown)
+    INSTALL_DIR := $(HOME)/.hajimu/plugins
+    NCPU        := $(shell sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
+endif
+
+CMAKE_FLAGS = -DCMAKE_BUILD_TYPE=Release -Wno-dev
 VENDOR_DIR   = vendor
 STB_IMAGE    = $(VENDOR_DIR)/stb_image.h
 STB_TRUETYPE = $(VENDOR_DIR)/stb_truetype.h
-
-# ── カラー出力 ──────────────────────────────────────────
-RESET  = \033[0m
-BOLD   = \033[1m
-GREEN  = \033[32m
-CYAN   = \033[36m
-YELLOW = \033[33m
-
-# ── ターゲット ──────────────────────────────────────────
-.PHONY: all vendor clean install uninstall example help
-
-all: vendor $(BUILD_DIR)/Makefile
-	@echo "$(CYAN)▶ ビルド中...$(RESET)"
-	@cmake --build $(BUILD_DIR) -j$(shell sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
-	@echo "$(GREEN)✅ ビルド完了: $(OUTPUT)$(RESET)"
-
-$(BUILD_DIR)/Makefile: CMakeLists.txt
-	@mkdir -p $(BUILD_DIR)
-	@cmake -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release -Wno-dev
 
 vendor: $(STB_IMAGE) $(STB_TRUETYPE)
 
 $(STB_IMAGE):
 	@mkdir -p $(VENDOR_DIR)
-	@echo "$(YELLOW)⬇ stb_image.h をダウンロード中...$(RESET)"
-	@curl -fsSL -o $(STB_IMAGE) \
-	    https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
-	@echo "$(GREEN)✅ stb_image.h$(RESET)"
+	@echo "  stb_image.h をダウンロード中..."
+	curl -fsSL -o $(STB_IMAGE) https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+	@echo "  ダウンロード完了: $(STB_IMAGE)"
 
 $(STB_TRUETYPE):
 	@mkdir -p $(VENDOR_DIR)
-	@echo "$(YELLOW)⬇ stb_truetype.h をダウンロード中...$(RESET)"
-	@curl -fsSL -o $(STB_TRUETYPE) \
-	    https://raw.githubusercontent.com/nothings/stb/master/stb_truetype.h
-	@echo "$(GREEN)✅ stb_truetype.h$(RESET)"
+	@echo "  stb_truetype.h をダウンロード中..."
+	curl -fsSL -o $(STB_TRUETYPE) https://raw.githubusercontent.com/nothings/stb/master/stb_truetype.h
+	@echo "  ダウンロード完了: $(STB_TRUETYPE)"
+.PHONY: all vendor clean install uninstall
 
+all: vendor $(OUTPUT)
+
+$(OUTPUT): CMakeLists.txt
+	cmake -S . -B $(BUILD_DIR) $(CMAKE_FLAGS)
+	cmake --build $(BUILD_DIR) -j$(NCPU)
+	@echo "  ビルド完了: $(OUTPUT)"
+clean:
+ifeq ($(OS),Windows_NT)
+	-rmdir /S /Q $(BUILD_DIR) 2>NUL
+else
+	rm -rf $(BUILD_DIR)
+endif
+	@echo "  クリーン完了"
 install: all
-	@mkdir -p $(INSTALL_DIR)
-	@cp $(OUTPUT) $(INSTALL_DIR)/
-	@echo "$(GREEN)✅ インストール完了: $(INSTALL_DIR)$(RESET)"
+ifeq ($(OS),Windows_NT)
+	if not exist "$(INSTALL_DIR)\$(PLUGIN_NAME)" mkdir "$(INSTALL_DIR)\$(PLUGIN_NAME)"
+	copy /Y $(OUTPUT) "$(INSTALL_DIR)\$(PLUGIN_NAME)"
+else
+	@mkdir -p $(INSTALL_DIR)/$(PLUGIN_NAME)
+	cp $(OUTPUT) $(INSTALL_DIR)/$(PLUGIN_NAME)/
+endif
+	@echo "  インストール完了: $(INSTALL_DIR)/$(PLUGIN_NAME)/"
 
 uninstall:
-	@rm -rf $(INSTALL_DIR)
-	@echo "$(GREEN)✅ 削除完了$(RESET)"
-
-example: install
-	@cd examples && hajimu hello_sprite.jp
-
-clean:
-	@rm -rf $(BUILD_DIR)
-	@echo "$(GREEN)✅ クリーン完了$(RESET)"
-
-help:
-	@echo "$(BOLD)jp-engine_render$(RESET) — はじむ用 2D レンダリングエンジン"
-	@echo ""
-	@echo "  $(CYAN)make vendor$(RESET)    stbヘッダーをダウンロード（初回のみ）"
-	@echo "  $(CYAN)make$(RESET)           ビルド"
-	@echo "  $(CYAN)make install$(RESET)   ~/.hajimu/plugins/ にインストール"
-	@echo "  $(CYAN)make clean$(RESET)     ビルド成果物を削除"
+ifeq ($(OS),Windows_NT)
+	-rmdir /S /Q "$(INSTALL_DIR)\$(PLUGIN_NAME)" 2>NUL
+else
+	rm -rf $(INSTALL_DIR)/$(PLUGIN_NAME)
+endif
+	@echo "  アンインストール完了"
