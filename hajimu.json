@@ -4,12 +4,18 @@
   "author": "Reo Shiozawa",
   "description": "はじむ用 2D レンダリングエンジン — SDL2 + OpenGL 3.3 + スプライトバッチ + フォント",
   "license": "MIT",
-  "build": "make",
+  "build": "make build/engine_render.hjp",
   "output": "build/engine_render.hjp",
   "install_dir": "~/.hajimu/plugins/engine_render/",
   "dependencies": {
     "sdl2": ">=2.0",
     "opengl": ">=3.3"
   },
-  "tags": ["render", "2d", "opengl", "sprite", "game"]
+  "tags": [
+    "render",
+    "2d",
+    "opengl",
+    "sprite",
+    "game"
+  ]
 }
