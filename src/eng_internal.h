@@ -13,6 +13,10 @@
   #define GL_GLEXT_PROTOTYPES
   #include <GL/gl.h>
   #include <GL/glext.h>
+#elif defined(_WIN32)
+  #include <SDL2/SDL_opengl.h>
+  #include <SDL2/SDL_opengl_glext.h>
+  #include "win_gl.h"
 #endif
 
 #include <SDL2/SDL.h>

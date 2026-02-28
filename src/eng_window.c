@@ -88,6 +88,9 @@ ENG_Renderer* eng_create(const char* title, int width, int height) {
         return NULL;
     }
     SDL_GL_MakeCurrent(win, ctx);
+#ifdef _WIN32
+    win_gl_load();
+#endif
     SDL_GL_SetSwapInterval(1);  /* VSync */
 
     /* 実際のサイズ取得 (Retina対応) */
