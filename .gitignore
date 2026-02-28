@@ -11,3 +11,12 @@ CMakeCache.txt
 CMakeFiles/
 Makefile.cmake
 install_manifest.txt
+
+# CMake 一時ビルドディレクトリ
+build_linux/
+build_macos/
+build_win/
+
+build_linux/
+build_macos/
+build_win/
