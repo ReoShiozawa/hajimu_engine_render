@@ -17,6 +17,6 @@ build_linux/
 build_macos/
 build_win/
 
-build_linux/
-build_macos/
-build_win/
+# vendor ライブラリ（ローカル配置、コミットしない）
+vendor/sdl2/
+vendor/windows/
