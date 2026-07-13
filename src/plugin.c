@@ -360,7 +360,7 @@ static HajimuPluginFunc funcs[] = {
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_render",
-        .version        = "1.3.1",
+        .version        = "1.4.0",
         .author         = "Reo Shiozawa",
         .description    = "はじむ用 2D レンダリングエンジン (SDL2 + OpenGL 3.3)",
         .functions      = funcs,

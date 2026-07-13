@@ -111,8 +111,10 @@ ENG_Renderer* eng_create(const char* title, int width, int height) {
 
     r->window  = win;
     r->gl_ctx  = ctx;
-    r->win_w   = dw;
-    r->win_h   = dh;
+    r->win_w   = width;
+    r->win_h   = height;
+    r->drawable_w = dw;
+    r->drawable_h = dh;
     r->cam_zoom = 1.0f;
 
     /* タイミング初期化 */
@@ -171,8 +173,9 @@ bool eng_update(ENG_Renderer* r) {
         }
         if (ev.type == SDL_WINDOWEVENT &&
             ev.window.event == SDL_WINDOWEVENT_RESIZED) {
-            SDL_GL_GetDrawableSize(r->window, &r->win_w, &r->win_h);
-            glViewport(0, 0, r->win_w, r->win_h);
+            SDL_GetWindowSize(r->window, &r->win_w, &r->win_h);
+            SDL_GL_GetDrawableSize(r->window, &r->drawable_w, &r->drawable_h);
+            glViewport(0, 0, r->drawable_w, r->drawable_h);
             eng_update_proj(r);
         }
         if (ev.type == SDL_MOUSEWHEEL) {
@@ -218,7 +221,9 @@ void eng_destroy(ENG_Renderer* r) {
     for (int i = 0; i < ENG_MAX_FONTS; ++i) {
         if (r->fonts[i].used) {
             glDeleteTextures(1, &r->fonts[i].atlas_tex);
-            free(r->fonts[i].baked);
+            free(r->fonts[i].glyphs);
+            free(r->fonts[i].font_info);
+            free(r->fonts[i].ttf_data);
         }
     }
 
@@ -286,7 +291,8 @@ void eng_set_fullscreen(ENG_Renderer* r, bool fullscreen) {
     Uint32 flags = fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
     SDL_SetWindowFullscreen(r->window, flags);
     SDL_GetWindowSize(r->window, &r->win_w, &r->win_h);
-    glViewport(0, 0, r->win_w, r->win_h);
+    SDL_GL_GetDrawableSize(r->window, &r->drawable_w, &r->drawable_h);
+    glViewport(0, 0, r->drawable_w, r->drawable_h);
     eng_update_proj(r);
 }
 

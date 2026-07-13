@@ -208,11 +208,13 @@ void eng_draw_sprite_flip(ENG_Renderer* r, ENG_TexID id,
 void eng_clip_begin(ENG_Renderer* r, float x, float y, float w, float h) {
     if (!r) return;
     eng_batch_flush(r);  /* 既存描画を先にフラッシュ */
+    float sx = r->win_w > 0 ? (float)r->drawable_w / (float)r->win_w : 1.0f;
+    float sy = r->win_h > 0 ? (float)r->drawable_h / (float)r->win_h : 1.0f;
     r->clip_active = true;
-    r->clip_x = (int)x;
-    r->clip_y = r->win_h - (int)(y + h);  /* OpenGL は下基準 */
-    r->clip_w = (int)w;
-    r->clip_h = (int)h;
+    r->clip_x = (int)(x * sx);
+    r->clip_y = r->drawable_h - (int)((y + h) * sy);  /* OpenGL は下基準 */
+    r->clip_w = (int)(w * sx);
+    r->clip_h = (int)(h * sy);
     glEnable(GL_SCISSOR_TEST);
     glScissor(r->clip_x, r->clip_y, r->clip_w, r->clip_h);
 }

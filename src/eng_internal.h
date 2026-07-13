@@ -57,15 +57,27 @@ typedef struct {
 } ENG_TexEntry;
 
 /* ── フォントエントリ ───────────────────────────────────*/
-#define ENG_FONT_ATLAS_W 512
-#define ENG_FONT_ATLAS_H 512
+#define ENG_FONT_ATLAS_W 2048
+#define ENG_FONT_ATLAS_H 2048
+#define ENG_MAX_FONT_GLYPHS 8192
+
+typedef struct {
+    uint32_t codepoint;
+    int      x, y, w, h;
+    float    xoff, yoff;
+    float    advance;
+} ENG_FontGlyph;
 
 typedef struct {
     GLuint  atlas_tex;
     float   size;
+    float   scale;
     bool    used;
-    /* stb_truetype baked chars: ASCII 32〜127 */
-    void*   baked; /* stbtt_bakedchar[96] */
+    unsigned char* ttf_data;
+    void*   font_info; /* stbtt_fontinfo */
+    ENG_FontGlyph* glyphs;
+    int     glyph_count;
+    int     atlas_x, atlas_y, atlas_row_h;
 } ENG_FontEntry;
 
 /* ── メインレンダラー構造体 ────────────────────────────*/
@@ -73,7 +85,8 @@ struct ENG_Renderer {
     /* SDL */
     SDL_Window*   window;
     SDL_GLContext gl_ctx;
-    int           win_w, win_h;
+    int           win_w, win_h;       /* SDLの論理座標サイズ */
+    int           drawable_w, drawable_h; /* OpenGLの物理解像度 */
 
     /* タイミング */
     uint64_t start_tick;
