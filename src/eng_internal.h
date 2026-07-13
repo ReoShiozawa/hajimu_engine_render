@@ -7,7 +7,9 @@
 #include "eng_render.h"
 
 #ifdef __APPLE__
-  #define GL_SILENCE_DEPRECATION
+  #ifndef GL_SILENCE_DEPRECATION
+    #define GL_SILENCE_DEPRECATION
+  #endif
   #include <OpenGL/gl3.h>
 #elif defined(__linux__)
   #define GL_GLEXT_PROTOTYPES

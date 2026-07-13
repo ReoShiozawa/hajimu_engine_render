@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 project(jp_engine_render C)
 
+# Apple Clang 17 on newer macOS releases otherwise stamps plug-ins with the
+# host OS version. Hajimu loads .hjp files dynamically, so keep the deployment
+# target aligned with the oldest supported macOS release.
+if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0" CACHE STRING "Minimum macOS version" FORCE)
+endif()
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
