@@ -45,6 +45,7 @@ PFNGLUNIFORM1IPROC                pfn_glUniform1i;
     var = (typeof(var)) SDL_GL_GetProcAddress(name); \
     if (!var) { \
         SDL_Log("[win_gl] WARNING: %s not found\n", name); \
+        return 0; \
     }
 
 int win_gl_load(void) {

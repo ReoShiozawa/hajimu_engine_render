@@ -89,7 +89,12 @@ ENG_Renderer* eng_create(const char* title, int width, int height) {
     }
     SDL_GL_MakeCurrent(win, ctx);
 #ifdef _WIN32
-    win_gl_load();
+    if (!win_gl_load()) {
+        SDL_GL_DeleteContext(ctx);
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+        return NULL;
+    }
 #endif
     SDL_GL_SetSwapInterval(1);  /* VSync */
 

@@ -45,6 +45,9 @@ set(ENG_RENDER_SOURCES
 
 # ── ターゲット ──────────────────────────────────────────
 add_library(engine_render SHARED ${ENG_RENDER_SOURCES})
+if(WIN32)
+    target_sources(engine_render PRIVATE src/win_gl.c)
+endif()
 
 # 出力名: engine_render.hjp
 set_target_properties(engine_render PROPERTIES
