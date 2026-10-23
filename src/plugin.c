@@ -357,6 +357,8 @@ static HajimuPluginFunc funcs[] = {
     FN(テキスト折返し描画,        5, 9),
 };
 
+HAJIMU_PLUGIN_ABI_EXPORT()
+
 HAJIMU_PLUGIN_EXPORT HajimuPluginInfo* hajimu_plugin_init(void) {
     static HajimuPluginInfo info = {
         .name           = "engine_render",
