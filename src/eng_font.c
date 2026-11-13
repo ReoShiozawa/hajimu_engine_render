@@ -83,9 +83,9 @@ static ENG_FontGlyph* eng_cache_glyph(ENG_FontEntry* fe, uint32_t codepoint) {
     ENG_FontGlyph* glyph = &fe->glyphs[fe->glyph_count++];
     memset(glyph, 0, sizeof(*glyph));
     glyph->codepoint = codepoint;
-    glyph->xoff = (float)x0;
-    glyph->yoff = (float)y0;
-    glyph->advance = advance_units * fe->scale;
+    glyph->xoff = (float)x0 / fe->raster_ratio;
+    glyph->yoff = (float)y0 / fe->raster_ratio;
+    glyph->advance = advance_units * fe->scale / fe->raster_ratio;
 
     int w = x1 - x0;
     int h = y1 - y0;
@@ -192,7 +192,10 @@ ENG_FontID eng_load_font(ENG_Renderer* r, const char* path, float size) {
     ENG_FontEntry* fe = &r->fonts[slot];
     fe->atlas_tex = tex;
     fe->size = size;
-    fe->scale = stbtt_ScaleForPixelHeight(info, size);
+    fe->raster_ratio = r->win_w > 0 ? (float)r->drawable_w / r->win_w : 1.0f;
+    if (fe->raster_ratio < 1.0f) fe->raster_ratio = 1.0f;
+    if (fe->raster_ratio > 3.0f) fe->raster_ratio = 3.0f;
+    fe->scale = stbtt_ScaleForPixelHeight(info, size * fe->raster_ratio);
     fe->ttf_data = ttf_buf;
     fe->font_info = info;
     fe->glyphs = glyphs;
@@ -258,7 +261,7 @@ static void eng_draw_glyph(ENG_Renderer* r, ENG_FontEntry* fe,
     float ah = (float)ENG_FONT_ATLAS_H;
     eng_batch_push_quad(r,
         x + glyph->xoff, y + glyph->yoff,
-        (float)glyph->w, (float)glyph->h,
+        (float)glyph->w / fe->raster_ratio, (float)glyph->h / fe->raster_ratio,
         glyph->x / aw, glyph->y / ah,
         (glyph->x + glyph->w) / aw,
         (glyph->y + glyph->h) / ah,

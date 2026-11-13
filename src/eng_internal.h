@@ -72,6 +72,7 @@ typedef struct {
     GLuint  atlas_tex;
     float   size;
     float   scale;
+    float   raster_ratio; /* 字形画像だけを高解像度化し、配置は論理座標を維持する。 */
     bool    used;
     unsigned char* ttf_data;
     void*   font_info; /* stbtt_fontinfo */
